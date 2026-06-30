@@ -1,4 +1,6 @@
 import customtkinter as ctk
+# Mengimpor modul LLMClient dari folder core
+from core.llm_client import LLMClient
 
 # Mengatur tema global aplikasi
 ctk.set_appearance_mode("Dark")  # Memaksa mode gelap agar lebih estetik sesuai desain
@@ -12,7 +14,12 @@ class MainWindow(ctk.CTk):
         self.title("DANAL AI - All-in-One Desktop Assistant")
         self.geometry("1150x700") 
         
-        # Grid layout utama (Kolom 0: Sidebar, Kolom 1: Konten)
+        # Inisialisasi Otak AI menggunakan model Qwen yang sudah kamu pull
+        self.ai_brain = LLMClient(model_name="gemini-2.5-flash")
+        # List untuk menampung riwayat obrolan selama aplikasi menyala
+        self.riwayat_chat = []
+        
+        # Grid layout utama (Kolom 0: Sidebar, Kolom 1: Konten Utama)
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
@@ -22,7 +29,7 @@ class MainWindow(ctk.CTk):
         self.sidebar_frame.grid(row=0, column=0, sticky="nsew")
         self.sidebar_frame.grid_rowconfigure(6, weight=1) 
 
-        # 1. LOGO / JUDUL APLIKASI (Diubah menjadi DANAL)
+        # 1. LOGO / JUDUL APLIKASI
         self.logo_label = ctk.CTkLabel(
             self.sidebar_frame, 
             text="✨ DANAL", 
@@ -118,14 +125,14 @@ class MainWindow(ctk.CTk):
         welcome_label = ctk.CTkLabel(self.main_frame, text="Selamat Datang di DANAL AI\nSilakan pilih menu di samping untuk memulai.", font=ctk.CTkFont(size=16))
         welcome_label.grid(row=0, column=0)
 
-    # --- KONTEN HALAMAN ---
+    # --- HALAMAN CHAT (SUDAH TERINTEGRASI AI) ---
 
     def buka_menu_chat(self):
         self.main_frame.grid_columnconfigure(0, weight=1)
         self.main_frame.grid_rowconfigure(0, weight=1)
         self.main_frame.grid_rowconfigure(1, weight=0)
         
-        self.chat_display = ctk.CTkTextbox(self.main_frame, state="disabled", corner_radius=10, fg_color=("#ffffff", "#2b2b2b"))
+        self.chat_display = ctk.CTkTextbox(self.main_frame, state="disabled", corner_radius=10, fg_color=("#ffffff", "#2b2b2b"), font=ctk.CTkFont(size=14))
         self.chat_display.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
         
         input_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
@@ -135,8 +142,50 @@ class MainWindow(ctk.CTk):
         self.chat_entry = ctk.CTkEntry(input_frame, placeholder_text="Tanya sesuatu ke DANAL AI...")
         self.chat_entry.grid(row=0, column=0, padx=(0, 10), sticky="ew")
         
-        btn_kirim = ctk.CTkButton(input_frame, text="Kirim", width=100)
-        btn_kirim.grid(row=0, column=1)
+        # Membantu user agar bisa mengirim pesan hanya dengan menekan tombol 'Enter' di keyboard
+        self.chat_entry.bind("<Return>", lambda event: self.kirim_pesan_ke_ai())
+        
+        self.btn_kirim = ctk.CTkButton(input_frame, text="Kirim", width=100, command=self.kirim_pesan_ke_ai)
+        self.btn_kirim.grid(row=0, column=1)
+
+    def kirim_pesan_ke_ai(self):
+        """Fungsi Logika Utama untuk mengirim pesan ke Ollama dan menampilkannya di teksbox"""
+        pesan_user = self.chat_entry.get().strip()
+        
+        if not pesan_user:
+            return  # Jika kotak input kosong, abaikan klik
+
+        # 1. Tampilkan pesan user ke kotak riwayat chat
+        self.chat_display.configure(state="normal")  # Buka kunci teksbox agar bisa diisi
+        self.chat_display.insert("end", f"👤 Anda:\n{pesan_user}\n\n")
+        self.chat_display.configure(state="disabled") # Kunci kembali
+        
+        # Kosongkan kotak input teks setelah dikirim
+        self.chat_entry.delete(0, "end")
+        
+        # Tampilkan teks loading sementara menunggu AI berpikir
+        self.chat_display.configure(state="normal")
+        self.chat_display.insert("end", "🤖 DANAL:\nSedang mengetik...")
+        self.chat_display.configure(state="disabled")
+        self.update()  # Memaksa GUI memperbarui tampilan teks loading
+
+        # 2. Kirim ke Ollama lokal lewat core/llm_client.py
+        jawaban_ai = self.ai_brain.kirim_pesan(pesan_user, self.riwayat_chat)
+
+        # 3. Hapus teks "Sedang mengetik..." lalu ganti dengan jawaban asli dari AI
+        self.chat_display.configure(state="normal")
+        self.chat_display.delete("end-2lines", "end")  # Menghapus kata terakhir ("Sedang mengetik...")
+        self.chat_display.insert("end", f"🤖 DANAL:\n{jawaban_ai}\n\n")
+        self.chat_display.configure(state="disabled")
+        
+        # 4. Simpan ke dalam riwayat chat jangka pendek
+        self.riwayat_chat.append({"role": "user", "content": pesan_user})
+        self.riwayat_chat.append({"role": "assistant", "content": jawaban_ai})
+        
+        # Otomatis scroll layar teks ke posisi paling bawah
+        self.chat_display.see("end")
+
+    # --- HALAMAN LAIN (Menunggu Tahap Selanjutnya) ---
 
     def buka_menu_vision(self):
         self.main_frame.grid_columnconfigure(0, weight=1)

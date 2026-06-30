@@ -22,10 +22,10 @@ Status:
 - [✅] Sistem navigasi halaman dinamis (`reset_main_frame`)
 - [✅] Fitur toggle tema (Dark/Light/System) secara real-time
 
-## [OTW] Tahap 3: Otak AI (Koneksi Ollama Lokal)
-- [⏳] Penulisan kode wrapper `core/llm_client.py`
-- [⏳] Integrasi logika tombol "Kirim" & input "Enter" pada GUI Chat
-- [⏳] Download model (Ollama Pull) di komputer lokal
+## [✅] Tahap 3: Otak AI (Koneksi Ollama Lokal)
+- [✅] Penulisan kode wrapper `core/llm_client.py`
+- [✅] Integrasi logika tombol "Kirim" & input "Enter" pada GUI Chat
+- [✅] Download model (Ollama Pull) di komputer lokal
 
 * [⏳] Tahap 4: Memori Jangka Panjang (mySQL Database)
 

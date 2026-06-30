@@ -4,4 +4,4 @@ SpeechRecognition
 pyttsx3
 pypdf
 requests
-ollama
+ollama (qwen2.5:0.5b)
