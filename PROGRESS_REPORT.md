@@ -7,7 +7,7 @@
 Status:
 - ⏳ `[BELUM]` : Fitur belum mulai disentuh.
 - 🚧 `[PROSES]` : Sedang dalam tahap penulisan kode atau pengujian.
-- ✅ `[BELUM]` : Fitur sudah berfungsi penuh dan stabil.
+- ⏳ `[BELUM]` : Fitur sudah berfungsi penuh dan stabil.
 
 ### 🏛️ Core & Foundation
 # 📊 Progress Report - DANAL AI
