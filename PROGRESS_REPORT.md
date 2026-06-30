@@ -92,5 +92,4 @@ ai_assistant/
 ---
 
 ## 🛠️ Catatan Tambahan / Bug Tracker
-*(Gunakan bagian ini untuk mencatat bug yang kamu temukan saat mencoba aplikasi)*
-1. (Contoh) Bug #1: Belum ada koneksi internet/lokal ke AI. (Status: Menunggu Tahap 3).
+1. Belum ada bug
