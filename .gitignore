@@ -1,0 +1,35 @@
+# --- PYTHON SYSTEM FILES ---
+# Mengabaikan folder cache bytecode Python (__pycache__)
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# --- VIRTUAL ENVIRONMENT ---
+# Mengabaikan folder environment jika kamu membuatnya lokal (misal: .venv, env)
+.venv/
+venv/
+ENV/
+env/
+
+# --- DATABASE / MEMORY LOKAL ---
+# Mengabaikan file database SQLite agar riwayat chat pribadimu tidak ter-push ke publik
+*.db
+*.sqlite3
+database/*.db
+
+# --- CONFIGURATION & SECRETS ---
+# Jika nanti kamu memasukkan API Key di file config, file ini wajib disembunyikan
+.env
+config/secrets.json
+
+# --- OPERATING SYSTEM ---
+# File sampah bawaan Windows dan Mac
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# --- IDE / TEXT EDITOR ---
+# Mengabaikan folder pengaturan text editor seperti VS Code atau PyCharm
+.vscode/
+.idea/

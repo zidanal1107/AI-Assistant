@@ -1,0 +1,7 @@
+customtkinter
+opencv-python
+SpeechRecognition
+pyttsx3
+pypdf
+requests
+ollama
