@@ -57,7 +57,8 @@ Status:
 * **Pencapaian:** * Berhasil merancang arsitektur folder modular (`gui/`, `core/`, `modules/`, `database/`).
     * Berhasil membuat jendela aplikasi utama menggunakan `customtkinter`.
     * Implementasi sistem navigasi *Sidebar* yang dinamis (bisa berganti halaman tanpa membuka *window* baru).
-## STRUKTUR FOLDER NYA
+
+# STRUKTUR FOLDER NYA
 ai_assistant/
 │
 ├── config/              # Pengaturan API, database, dan prompt AI
