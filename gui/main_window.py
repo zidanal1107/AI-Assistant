@@ -125,66 +125,105 @@ class MainWindow(ctk.CTk):
         welcome_label = ctk.CTkLabel(self.main_frame, text="Selamat Datang di DANAL AI\nSilakan pilih menu di samping untuk memulai.", font=ctk.CTkFont(size=16))
         welcome_label.grid(row=0, column=0)
 
-    # --- HALAMAN CHAT (SUDAH TERINTEGRASI AI) ---
+    # --- HALAMAN CHAT (RESPONSIF & AREA INPUT-OUTPUT DIPERBESAR) ---
 
     def buka_menu_chat(self):
+        # Konfigurasi Grid Utama Halaman Chat
         self.main_frame.grid_columnconfigure(0, weight=1)
-        self.main_frame.grid_rowconfigure(0, weight=1)
-        self.main_frame.grid_rowconfigure(1, weight=0)
+        self.main_frame.grid_rowconfigure(0, weight=1)  # Baris 0 (Chat Display) mengambil sisa space terbesar
+        self.main_frame.grid_rowconfigure(1, weight=0)  # Baris 1 (Input Area) tetap kokoh di bawah
         
-        self.chat_display = ctk.CTkTextbox(self.main_frame, state="disabled", corner_radius=10, fg_color=("#ffffff", "#2b2b2b"), font=ctk.CTkFont(size=14))
-        self.chat_display.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
+        # 1. CHAT DISPLAY (DIperbesar padding internal & ukuran font)
+        self.chat_display = ctk.CTkTextbox(
+            self.main_frame, 
+            state="disabled", 
+            corner_radius=12, 
+            fg_color=("#ffffff", "#242424"), 
+            text_color=("#111111", "#e6e6e6"),
+            font=ctk.CTkFont(family="Inter", size=15, weight="normal"), # Ukuran teks output diperbesar
+            spacing1=8,  # Jarak antar baris paragraf agar lebih lega
+            spacing3=8
+        )
+        # Menggunakan padx/pady 30 agar teks tidak terlalu menempel ke pinggir frame utama
+        self.chat_display.grid(row=0, column=0, padx=30, pady=(30, 15), sticky="nsew")
         
+        # 2. INPUT CONTAINER FRAME (Dibuat responsif meluas secara horizontal)
         input_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
-        input_frame.grid(row=1, column=0, padx=20, pady=10, sticky="ew")
-        input_frame.grid_columnconfigure(0, weight=1)
+        input_frame.grid(row=1, column=0, padx=30, pady=(0, 30), sticky="ew")
+        input_frame.grid_columnconfigure(0, weight=1) # Entry box akan membesar mengikuti ukuran window
         
-        self.chat_entry = ctk.CTkEntry(input_frame, placeholder_text="Tanya sesuatu ke DANAL AI...")
-        self.chat_entry.grid(row=0, column=0, padx=(0, 10), sticky="ew")
+        # 3. CHAT ENTRY BOX (Dipertinggi dan diperbesar font-nya)
+        self.chat_entry = ctk.CTkEntry(
+            input_frame, 
+            placeholder_text="Tanya sesuatu ke DANAL AI...",
+            height=50, # Tinggi entry box dinaikkan dari default agar elegan
+            font=ctk.CTkFont(size=15), # Ukuran teks input diperbesar
+            corner_radius=10,
+            border_width=1,
+            border_color=("#d1d1d1", "#3b3b3b"),
+            fg_color=("#f9f9f9", "#2e2e2e")
+        )
+        self.chat_entry.grid(row=0, column=0, padx=(0, 15), sticky="ew")
         
-        # Membantu user agar bisa mengirim pesan hanya dengan menekan tombol 'Enter' di keyboard
+        # Bind tombol 'Enter'
         self.chat_entry.bind("<Return>", lambda event: self.kirim_pesan_ke_ai())
         
-        self.btn_kirim = ctk.CTkButton(input_frame, text="Kirim", width=100, command=self.kirim_pesan_ke_ai)
-        self.btn_kirim.grid(row=0, column=1)
+        # 4. TOMBOL KIRIM MODEREN
+        self.btn_kirim = ctk.CTkButton(
+            input_frame, 
+            text="Kirim 🚀", 
+            width=120, 
+            height=50, # Tinggi disamakan dengan Entry Box agar sejajar presisi
+            font=ctk.CTkFont(size=15, weight="bold"),
+            corner_radius=10,
+            hover_color="#1a5c8f",
+            command=self.kirim_pesan_ke_ai
+        )
+        self.btn_kirim.grid(row=0, column=1, sticky="ns")
 
     def kirim_pesan_ke_ai(self):
-        """Fungsi Logika Utama untuk mengirim pesan ke Ollama dan menampilkannya di teksbox"""
         pesan_user = self.chat_entry.get().strip()
-        
         if not pesan_user:
-            return  # Jika kotak input kosong, abaikan klik
+            return
 
-        # 1. Tampilkan pesan user ke kotak riwayat chat
-        self.chat_display.configure(state="normal")  # Buka kunci teksbox agar bisa diisi
+        # 1. Tampilkan pesan user ke kotak chat (Jarak dikurangi menjadi hanya 1 baris kosong setelahnya)
+        self.chat_display.configure(state="normal")
         self.chat_display.insert("end", f"👤 Anda:\n{pesan_user}\n\n")
-        self.chat_display.configure(state="disabled") # Kunci kembali
         
-        # Kosongkan kotak input teks setelah dikirim
-        self.chat_entry.delete(0, "end")
-        
-        # Tampilkan teks loading sementara menunggu AI berpikir
-        self.chat_display.configure(state="normal")
-        self.chat_display.insert("end", "🤖 DANAL:\nSedang mengetik...")
+        # Siapkan placeholder untuk jawaban DANAL
+        self.chat_display.insert("end", "🤖 DANAL:\n")
         self.chat_display.configure(state="disabled")
-        self.update()  # Memaksa GUI memperbarui tampilan teks loading
-
-        # 2. Kirim ke Ollama lokal lewat core/llm_client.py
-        jawaban_ai = self.ai_brain.kirim_pesan(pesan_user, self.riwayat_chat)
-
-        # 3. Hapus teks "Sedang mengetik..." lalu ganti dengan jawaban asli dari AI
-        self.chat_display.configure(state="normal")
-        self.chat_display.delete("end-2lines", "end")  # Menghapus kata terakhir ("Sedang mengetik...")
-        self.chat_display.insert("end", f"🤖 DANAL:\n{jawaban_ai}\n\n")
-        self.chat_display.configure(state="disabled")
-        
-        # 4. Simpan ke dalam riwayat chat jangka pendek
-        self.riwayat_chat.append({"role": "user", "content": pesan_user})
-        self.riwayat_chat.append({"role": "assistant", "content": jawaban_ai})
-        
-        # Otomatis scroll layar teks ke posisi paling bawah
         self.chat_display.see("end")
+        
+        self.chat_entry.delete(0, "end")
 
+        # Fungsi yang menangani setiap kata yang masuk dari Gemini
+        def terima_potongan_kata(chunk_teks):
+            self.chat_display.configure(state="normal")
+            self.chat_display.insert("end", chunk_teks)
+            self.chat_display.configure(state="disabled")
+            self.chat_display.see("end")
+
+        # Fungsi yang dipanggil saat Gemini SUDAH SELESAI mengetik seluruhnya
+        def selesai_merespons(jawaban_penuh):
+            self.chat_display.configure(state="normal")
+            # Cukup beri 2 kali newline (\n\n) sebagai pembatas tegas antar gelembung chat berikutnya
+            self.chat_display.insert("end", "\n\n") 
+            self.chat_display.configure(state="disabled")
+            
+            # Simpan ke riwayat memori jangka pendek aplikasi
+            self.riwayat_chat.append({"role": "user", "content": pesan_user})
+            self.riwayat_chat.append({"role": "assistant", "content": jawaban_penuh})
+            self.chat_display.see("end")
+
+        # 2. Panggil fungsi stream dari LLMClient
+        self.ai_brain.kirim_pesan_stream(
+            pesan_user, 
+            self.riwayat_chat, 
+            terima_potongan_kata, 
+            selesai_merespons
+        )
+        
     # --- HALAMAN LAIN (Menunggu Tahap Selanjutnya) ---
 
     def buka_menu_vision(self):

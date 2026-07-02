@@ -1,7 +1,9 @@
-customtkinter
-opencv-python
-SpeechRecognition
-pyttsx3
-pypdf
-requests
-ollama (qwen2.5:0.5b)
+customtkinter==5.2.2
+opencv-python==4.10.0.84
+SpeechRecognition==3.10.4
+pyttsx3==2.90
+pypdf==4.2.0
+requests==2.32.3
+ollama==0.2.1
+
+google-genai
